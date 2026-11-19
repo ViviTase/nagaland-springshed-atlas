@@ -1,0 +1,11 @@
+rank,variable,total_splits
+1,terrain_elevation,234
+2,relief_m,226
+3,soil_sand_5-15cm,223
+4,lc_10,210
+5,derived_flow,204
+6,rain_annual,196
+7,soil_sand_0-5,190
+8,rain_monsoon,186
+9,soil_clay_5-15,180
+10,lc_40,167

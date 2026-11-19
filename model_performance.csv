@@ -1,0 +1,7 @@
+validation_design,folds,rf_auc,gb_auc,lr_auc,rf_accuracy,gb_accuracy,lr_accuracy
+10 km spatial blocks,5,0.674,0.683,0.618,0.609,0.628,0.581
+Random folds,5,0.704,0.704,0.641,0.647,0.64,0.647
+Leave one district out,11,0.569,0.553,0.456,0.562,0.541,0.562
+
+overlay_score_auc,0.572
+plain_guess_accuracy,0.5246

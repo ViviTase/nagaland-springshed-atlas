@@ -1,0 +1,1022 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Nagaland Springshed Atlas</title>
+<meta name="description" content="An interactive atlas of spring reliance, equity and growth pressure in 1,262 hill villages of Nagaland. Made for academic purposes.">
+<meta property="og:title" content="Nagaland Springshed Atlas"><meta property="og:description" content="Spring reliance, equity and growth pressure in Nagaland's hill villages. Map, data and method.">
+<meta property="og:type" content="website"><meta property="og:image" content="icon-512.png">
+<meta name="theme-color" content="#0b3d4a"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<script>if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Concept: a water-survey atlas. Deep spring teal for structure, one warm orange only for high reliance, cool paper-like neutrals. */
+:root{
+  --bg:#f1f5f4; --panel:#ffffff; --panel2:#f6f9f9; --ink:#10252a; --muted:#52696f; --line:#d3dedf;
+  --accent:#0b6a7a; --accent-ink:#ffffff; --focus:#0b6a7a; --deep:#0a3b46; --deep-ink:#eaf6f8;
+  --map-bg:#e9eee6;--road:#d9b99a; --ctx:#e9eee6; --water:#a7cadb; --lab:#74898e; --land:#fcfdfc; --edge:#7d9399; --state:#2c4a52; --vedge:rgba(60,90,98,.28); --halo:rgba(255,255,255,.9);
+  --high:#d9480f; --other:#6f98ad;
+  --z0:#1a7f8e; --z1:#e69f00; --z2:#c0392b; --z3:#6a51a3; --z4:#b9c4c7;
+  --shadow:0 1px 2px rgba(16,37,42,.08),0 6px 18px rgba(16,37,42,.10);
+  --font-d:"Space Grotesk",system-ui,sans-serif; --font-b:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0b1619; --panel:#12242a; --panel2:#0f1e23; --ink:#e3eef0; --muted:#93aab0; --line:#244047;
+  --accent:#4fc3d4; --accent-ink:#06242a; --focus:#4fc3d4; --deep:#0c2a31; --deep-ink:#e3f3f6;
+  --map-bg:#0e1d22;--road:#5a4b3a; --ctx:#0e1d22; --water:#21475a; --lab:#6f8a91; --land:#18303a; --edge:#5f7c84; --state:#a9c4ca; --vedge:rgba(169,196,202,.2); --halo:rgba(10,20,23,.85);
+  --high:#ff7a3d; --other:#6f98ad;
+  --z0:#3ec0cf; --z1:#f2b632; --z2:#ef6a5b; --z3:#9a85d6; --z4:#51666b;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0b1619; --panel:#12242a; --panel2:#0f1e23; --ink:#e3eef0; --muted:#93aab0; --line:#244047;
+  --accent:#4fc3d4; --accent-ink:#06242a; --focus:#4fc3d4; --deep:#0c2a31; --deep-ink:#e3f3f6;
+  --map-bg:#0e1d22;--road:#5a4b3a; --ctx:#0e1d22; --water:#21475a; --lab:#6f8a91; --land:#18303a; --edge:#5f7c84; --state:#a9c4ca; --vedge:rgba(169,196,202,.2); --halo:rgba(10,20,23,.85);
+  --high:#ff7a3d; --other:#6f98ad;
+  --z0:#3ec0cf; --z1:#f2b632; --z2:#ef6a5b; --z3:#9a85d6; --z4:#51666b;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.35);
+  color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:14px;line-height:1.5}
+h1,h2,h3,h4{font-family:var(--font-d);margin:0;font-weight:600;text-wrap:balance;letter-spacing:-.01em}
+p{margin:0 0 10px}
+a{color:var(--accent)}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr)}
+/* top bar */
+.top{background:var(--deep);color:var(--deep-ink);display:flex;flex-wrap:wrap;align-items:center;gap:8px 26px;
+  padding:12px max(18px,env(safe-area-inset-right,0px)) 12px max(18px,env(safe-area-inset-left,0px));position:relative;z-index:30}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;min-width:0}
+.brand svg{flex:none}
+.brand b{display:block;font-family:var(--font-d);font-size:22px;line-height:1.1;letter-spacing:-.015em;font-weight:700}
+.brand small{display:block;font-size:12px;opacity:.78;margin-top:2px}
+.nav{display:flex;gap:4px}
+.nav a{color:inherit;text-decoration:none;padding:8px 14px;border-radius:8px;font-weight:500;opacity:.85}
+.nav a:hover{background:rgba(255,255,255,.1);opacity:1}
+.nav a[aria-current=page]{background:rgba(255,255,255,.16);opacity:1;font-weight:600}
+.search{margin-left:auto;position:relative;width:min(380px,100%)}
+.search input{width:100%;padding:10px 14px 10px 38px;border:1px solid rgba(255,255,255,.28);border-radius:10px;background:rgba(255,255,255,.12);color:#fff}
+.search input::placeholder{color:rgba(255,255,255,.7)}
+.search input:focus{background:#fff;color:#10252a;outline:2px solid #fff}
+.search input:focus::placeholder{color:#6b8187}
+.search svg{position:absolute;left:12px;top:11px;pointer-events:none}
+.sug{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);overflow:hidden;z-index:50;max-height:60vh;overflow-y:auto}
+.sug button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:9px 12px;border:0;background:none;cursor:pointer}
+.sug button:hover,.sug button[aria-selected=true]{background:var(--panel2)}
+.sug small{color:var(--muted)}
+.sug h5{margin:0;padding:7px 12px 3px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-weight:600}
+main{min-height:0;position:relative}
+.page{display:none;height:100%}
+.page.on{display:block}
+.scroll{overflow-y:auto}
+.wrap{max-width:1080px;margin:0 auto;padding:28px max(18px,env(safe-area-inset-right,0px)) 40px max(18px,env(safe-area-inset-left,0px))}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:600;text-decoration:none;cursor:pointer}
+.btn.alt{background:transparent;color:var(--accent)}
+.btn.sm{padding:6px 12px;font-size:13px}
+/* home */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:center;padding:10px 0 26px}
+.hero h2{font-size:clamp(28px,4vw,42px);line-height:1.1;margin-bottom:14px}
+.hero p.lead{font-size:16px;color:var(--muted);max-width:56ch}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.prev{background:var(--map-bg);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow);aspect-ratio:1.05;min-width:0}
+.prev canvas{width:100%;height:100%;display:block}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:6px 0 30px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.kpi b{display:block;font-family:var(--font-d);font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi span{color:var(--muted);font-size:13px}
+h3.sec{font-size:20px;margin:30px 0 12px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.cardx{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:6px}
+.cardx h4{font-size:16px}
+.cardx p{color:var(--muted);margin:0;flex:1}
+.cardx a{font-weight:600;text-decoration:none}
+.note{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--high);border-radius:10px;padding:14px 16px;margin:24px 0}
+.note b{font-family:var(--font-d)}
+/* map page */
+.mapview{position:relative;overflow:hidden;background:var(--map-bg)}
+canvas.m{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+canvas.m.drag{cursor:grabbing}
+.tb{position:absolute;top:12px;display:flex;gap:8px;z-index:6}
+.tb.l{left:12px}.tb.r{right:12px}
+.tbtn{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:var(--shadow);font-weight:600;cursor:pointer}
+.tbtn:hover{background:var(--panel2)}
+.drawer{position:absolute;top:12px;bottom:12px;width:316px;max-width:calc(100% - 24px);background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);z-index:8;display:none;flex-direction:column;min-height:0}
+.drawer.left{left:12px}.drawer.right{right:12px;width:350px}
+.mapview.lo .drawer.left,.mapview.ro .drawer.right{display:flex}
+.mapview.lo .tb.l,.mapview.ro .tb.r{display:none}
+.dh{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.dh h2{font-size:16px}
+.x{width:30px;height:30px;border:0;border-radius:8px;background:none;cursor:pointer;font-size:20px;line-height:1}
+.x:hover{background:var(--panel2)}
+.db{overflow-y:auto;padding:12px 14px 16px;min-height:0}
+.db h2.s{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px;font-weight:600}
+.db h2.s:first-child{margin-top:0}
+.db h4{margin:8px 0 2px 6px;font-size:11.5px;color:var(--muted);font-weight:600;font-family:var(--font-b)}
+.opt{display:flex;gap:9px;align-items:flex-start;padding:6px 8px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+.opt:hover{background:var(--panel2)}
+.opt input{margin:3px 0 0;accent-color:var(--accent)}
+.opt b{display:block;font-weight:600}
+.opt span{display:block;color:var(--muted);font-size:12px}
+.opt:has(input:checked){background:var(--panel2);border-color:var(--line)}
+.msel{margin:4px 0 2px}
+.msel>button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--panel);cursor:pointer;text-align:left}
+.msel>button[aria-expanded=true]{border-color:var(--accent)}
+.mpanel{margin-top:4px;border:1px solid var(--line);border-radius:10px;background:var(--panel);box-shadow:var(--shadow);padding:4px}
+.mpanel .foot{display:flex;justify-content:space-between;padding:4px 8px 2px}
+.years{display:flex;gap:6px;align-items:center;margin:6px 0 2px 8px;flex-wrap:wrap}
+.years button{padding:4px 10px;border:1px solid var(--line);border-radius:999px;background:var(--panel);cursor:pointer;font-size:12.5px}
+.years button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.field{display:grid;gap:4px;margin:8px 0}
+.field label{font-size:12px;color:var(--muted)}
+select{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.count{font-size:12px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+.link{background:none;border:0;color:var(--accent);cursor:pointer;padding:0;font-size:12.5px;text-decoration:underline}
+details{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+summary{cursor:pointer;font-weight:600}
+details p,details li{color:var(--muted);font-size:12.5px}
+details ul{padding-left:18px;margin:6px 0}
+.zoom{position:absolute;right:12px;bottom:70px;display:grid;gap:1px;background:var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);z-index:5}
+.zoom button{width:36px;height:36px;border:0;background:var(--panel);font-size:18px;cursor:pointer;line-height:1}
+.zoom button:hover{background:var(--panel2)}
+.legend{position:absolute;right:60px;bottom:62px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow);max-width:min(280px,calc(100% - 24px));max-height:55%;overflow:auto;font-size:12.5px;z-index:5}
+.legend h3{font-size:12.5px;margin-bottom:6px}
+.legend h3.n{margin-top:10px}
+.legend .row{display:flex;align-items:center;gap:8px;margin:3px 0}
+.sw{width:11px;height:11px;border-radius:50%;flex:none}
+.sq{width:11px;height:11px;flex:none;background:var(--ink);border:1.5px solid var(--land)}
+.bar{height:9px;border-radius:5px;margin:4px 0 2px}
+.scale{display:flex;justify-content:space-between;color:var(--muted);font-size:11.5px}
+.sub{color:var(--muted);font-size:11.5px;margin-top:6px}
+.mapview.ro .zoom,.mapview.ro .rb{right:374px}
+.mapview.ro .legend{right:422px}
+.bop{position:absolute;left:12px;bottom:12px;z-index:5;display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;box-shadow:var(--shadow);font-size:12.5px}
+.bop label{color:var(--muted);font-weight:600;white-space:nowrap}
+.bop input{width:130px;accent-color:var(--accent)}
+.bop b{min-width:36px;text-align:right;font-variant-numeric:tabular-nums}
+.mapview.lo .bop{left:340px}
+@media (max-width:900px){.mapview.lo .bop{display:none}}
+.rb{position:absolute;right:12px;bottom:12px;text-align:right;z-index:4;pointer-events:none}
+.scalebar{display:inline-block;font-size:11.5px;color:var(--muted);text-align:center}
+.scalebar i{display:block;height:6px;border:1.5px solid var(--muted);border-top:0;margin-bottom:2px}
+.attr{font-size:10.5px;color:var(--muted);max-width:300px;margin-top:4px;text-shadow:0 0 3px var(--halo),0 0 3px var(--halo)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:5px 9px;border-radius:7px;font-size:12px;white-space:nowrap;z-index:9;box-shadow:var(--shadow)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0}
+.stat b{display:block;font-family:var(--font-d);font-size:20px;line-height:1.15;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.mix{display:flex;height:12px;border-radius:6px;overflow:hidden;margin:8px 0}
+.mixl{display:grid;gap:3px;font-size:12.5px}
+.mixl div{display:flex;align-items:center;gap:8px}
+.mixl em{margin-left:auto;font-style:normal;font-variant-numeric:tabular-nums;color:var(--muted)}
+.gro{display:grid;gap:6px;margin:6px 0 4px}
+.gro button{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer}
+.gro button[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 3px 0 var(--accent)}
+.gro b{font-weight:600}
+.gro em{font-style:normal;font-variant-numeric:tabular-nums;font-weight:600}
+.gro i{grid-column:1/3;display:block;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.gro i u{display:block;height:100%;background:var(--high)}
+.gro small{grid-column:1/3;color:var(--muted);font-size:11.5px}
+.vtitle{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.card{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:14px;background:var(--panel2)}
+.card dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0}
+.card dt{color:var(--muted)}
+.card dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:12px;font-weight:600;color:#fff}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}
+th:first-child,td:first-child{text-align:left}
+.tl td,.tl th{text-align:left}
+th button{background:none;border:0;cursor:pointer;font-weight:600;color:var(--muted);padding:0}
+th button[aria-pressed=true]{color:var(--ink)}
+#tbl td,#tbl th{white-space:nowrap}
+#tbl tbody tr{cursor:pointer}
+#tbl tbody tr:hover,#tbl tbody tr.on{background:var(--panel2)}
+#tbl tbody tr.on td:first-child{box-shadow:inset 3px 0 var(--accent)}
+.mini{display:inline-block;height:6px;border-radius:3px;background:var(--high);vertical-align:middle;margin-right:6px}
+.err{padding:24px;color:var(--high)}
+/* data + about */
+.ds{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 18px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px;align-items:center}
+.ds h4{font-size:16px}
+.ds p{margin:4px 0 0;color:var(--muted)}
+.ds code{font-size:12px;background:var(--panel2);padding:1px 6px;border-radius:5px;border:1px solid var(--line);overflow-wrap:anywhere}
+.ds .meta{font-size:12.5px;color:var(--muted);margin-top:6px}
+.about{display:grid;grid-template-columns:200px minmax(0,1fr);gap:34px}
+.toc{position:sticky;top:20px;align-self:start;display:grid;gap:2px}
+.toc button{text-align:left;border:0;background:none;padding:7px 10px;border-radius:8px;cursor:pointer;color:var(--muted)}
+.toc button:hover{background:var(--panel2);color:var(--ink)}
+.about section{margin-bottom:34px;scroll-margin-top:12px}
+.about h3{font-size:22px;margin-bottom:10px}
+.about ul,.about ol{padding-left:20px;margin:0 0 12px}
+.about li{margin-bottom:5px}
+.tw{overflow-x:auto;margin:10px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.tw table{min-width:560px}
+.tw th{text-align:left;background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.tw td{text-align:left}
+.tw td.n,.tw th.n{text-align:right}
+.tw tr:last-child td{border-bottom:0}
+a.c{text-decoration:none;font-size:12px;vertical-align:super;line-height:0;font-weight:600}
+.refs li{margin-bottom:8px;color:var(--muted)}
+.warn{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--z1);border-radius:10px;padding:14px 16px;margin:14px 0}
+footer.f{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);margin-top:30px;padding-top:14px}
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .about{grid-template-columns:1fr}
+  .toc{position:static;display:flex;flex-wrap:wrap}
+  .search{margin-left:0;width:100%;order:3}
+  .brand b{font-size:19px}
+  .mapview.lo .legend,.mapview.ro .legend{display:none}
+  .mapview.ro .zoom,.mapview.ro .rb{right:12px}
+  .drawer.right{width:calc(100% - 24px)}
+  .rb .attr{display:none}
+}
+@media (max-width:520px){.ds{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <a class="brand" href="#home" aria-label="Nagaland Springshed Atlas, home">
+      <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><rect width="44" height="44" rx="11" fill="rgba(255,255,255,.12)"/><path d="M5 31c6-3 10 3 16 0s10-3 18 0M5 36c6-3 10 3 16 0s10-3 18 0" fill="none" stroke="#8fd3df" stroke-width="1.6" opacity=".75"/><path d="M22 7c4 6 8 9.5 8 14a8 8 0 0 1-16 0c0-4.5 4-8 8-14z" fill="#e8f7fa"/><path d="M22 14c1.8 3 4 4.7 4 7a4 4 0 0 1-8 0c0-2.300 2.200-4 4-7z" fill="#1a8a9c"/></svg>
+      <div><b>Nagaland Springshed Atlas</b><small>Spring reliance, equity and growth pressure in hill villages</small></div>
+    </a>
+    <nav class="nav" aria-label="Main">
+      <a href="#home" data-p="home">Home</a><a href="#map" data-p="map">Map</a><a href="#data" data-p="data">Data</a><a href="#about" data-p="about">About</a>
+    </nav>
+    <div class="search" role="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" type="search" autocomplete="off" role="combobox" aria-expanded="false" aria-controls="sug" placeholder="Search a district or village ID" aria-label="Search a district or village ID">
+      <div class="sug" id="sug" role="listbox" hidden></div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME -->
+    <section class="page scroll" id="pg-home"><div class="wrap">
+      <div class="hero">
+        <div>
+          <h2>Where do hill villages depend on springs, and who is most at risk?</h2>
+          <p class="lead">This atlas maps 1,262 Nagaland villages by how likely they are to rely on springs for water, who needs support most, and where new built-up land could press on spring areas. It is an open-data research prototype made for academic purposes.</p>
+          <div class="cta"><a class="btn" href="#map">Open the map</a><a class="btn alt" href="#about">Read how it was made</a></div>
+        </div>
+        <div class="prev"><canvas id="prev" aria-label="Small map of Nagaland villages, orange for high reliance"></canvas></div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+
+      <h3 class="sec">What you can do here</h3>
+      <div class="cards">
+        <div class="cardx"><h4>Explore the map</h4><p>Colour villages by spring reliance, need, planning zone or possible new built-up area. Switch the base map to elevation, tree cover or built-up land in 2000, 2010 and 2020.</p><a href="#map">Go to the map &rarr;</a></div>
+        <div class="cardx"><h4>Search a district</h4><p>Type a district name in the top bar. The map zooms to its boundary and the side panel shows its villages, zones and growth scenarios.</p><a href="#map">Try it &rarr;</a></div>
+        <div class="cardx"><h4>Download the data</h4><p>District and village tables, growth scenarios, model results and district boundaries, as plain CSV and JSON files.</p><a href="#data">Open data page &rarr;</a></div>
+        <div class="cardx"><h4>Read the method</h4><p>What a springshed is, how the score was built, how well it tested, and where it can be wrong.</p><a href="#about">Open about page &rarr;</a></div>
+      </div>
+
+      <h3 class="sec">What the results say so far</h3>
+      <div class="cards">
+        <div class="cardx"><h4>A third of villages rely heavily</h4><p id="r1"></p></div>
+        <div class="cardx"><h4>Reliance is uneven</h4><p id="r2"></p></div>
+        <div class="cardx"><h4>The model is modest</h4><p>It separates spring from non-spring villages only moderately on nearby unseen land, and weakly on whole unseen districts. Use the scores to ask where to look first, not to decide.</p></div>
+      </div>
+      <div class="note"><b>Please read this first.</b> This is a student research prototype, still being checked. Census 2011 is old, the model has limits and some numbers may contain errors. Details are on the <a href="#about">About page</a>.</div>
+    </div></section>
+
+    <!-- MAP -->
+    <section class="page mapview" id="pg-map">
+      <canvas id="map" class="m" tabindex="0" role="img" aria-label="Map of Nagaland villages coloured by the selected layer. Use the controls, the search bar and the side panels to explore."></canvas>
+      <div class="tb l"><button class="tbtn" id="tL" type="button" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg>Layers and filters</button></div>
+      <div class="tb r"><button class="tbtn" id="tR" type="button" aria-expanded="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Analysis</button></div>
+
+      <aside class="drawer left" id="dl" aria-label="Layers and filters">
+        <div class="dh"><h2>Layers and filters</h2><button class="x" id="xL" aria-label="Close panel">&times;</button></div>
+        <div class="db">
+          <h2 class="s">Base map</h2>
+          <div class="msel" id="msel"><button type="button" id="basesBtn" aria-haspopup="true" aria-expanded="false" aria-controls="bases"><span id="basesLbl">Plain</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><div class="mpanel" id="bases" role="group" aria-label="Base map layers" hidden></div><span class="sub" style="display:block;margin-top:4px">Pick one or more. Leave all unticked for a plain map.</span></div>
+          <div class="years" id="yearsRow" hidden><span style="font-size:12px;color:var(--muted)">Year</span>
+            <button type="button" data-y="2000" aria-pressed="false">2000</button><button type="button" data-y="2010" aria-pressed="false">2010</button><button type="button" data-y="2020" aria-pressed="true">2020</button>
+            <button type="button" id="play" aria-pressed="false">Play</button></div>
+          <h2 class="s">Colour villages by</h2>
+          <div id="layers" role="radiogroup" aria-label="Village colour layer"></div>
+          <h2 class="s">Overlays</h2>
+          <label class="opt"><input type="checkbox" id="ovCtx" checked><div><b>Surrounding region</b><span>Neighbouring states, rivers and towns</span></div></label>
+          <label class="opt"><input type="checkbox" id="ovDist" checked><div><b>District boundaries</b><span>With district headquarters</span></div></label>
+          <label class="opt"><input type="checkbox" id="ovHeat"><div><b>Smoothed reliance surface</b><span>Local average of the model score</span></div></label>
+          <label class="opt"><input type="checkbox" id="ovPts" checked><div><b>Village points</b><span>Turn off to read the base map alone</span></div></label>
+          <h2 class="s">Filters</h2>
+          <div class="field"><label for="fDist">District</label><select id="fDist"></select></div>
+          <div class="field"><label for="fZone">Planning zone</label><select id="fZone"></select></div>
+          <div class="field"><label for="fScore">Model score at least <b id="fScoreV">0.00</b></label><input type="range" id="fScore" min="0" max="0.9" step="0.05" value="0"></div>
+          <div class="count"><span id="count" aria-live="polite"></span><button class="link" id="reset" type="button">Reset</button></div>
+          <details>
+            <summary>How to read this map</summary>
+            <p><b>Model score</b> is the model's estimate (0 to 1) that a village reports a spring as its water source in Census 2011. Villages at 0.58 or more are called high reliance (top third).</p>
+            <p><b>Equity score</b> is the average of three ranks: model score, Scheduled Tribe share, and no tap or handpump. Higher means greater need.</p>
+            <ul><li><b>Restore</b>: high reliance and below-median tree cover</li><li><b>Regulate</b>: high reliance and fast built-up growth</li><li><b>Protect</b>: other high reliance villages</li><li><b>Guide growth</b>: fast growth, lower reliance</li><li><b>Monitor</b>: everything else</li></ul>
+            <p><b>Growth scenarios</b> are what-if runs of new built-up area from 2020 to 2030, not forecasts. Rapid is 1.5 times the trend. Managed keeps the trend total but steers it away from high reliance villages.</p>
+            <p>Drag to move, scroll or pinch to zoom, click a village, a village area or a district. With the map focused, arrow keys move it and + and &minus; zoom.</p>
+          </details>
+        </div>
+      </aside>
+
+      <aside class="drawer right" id="dr" aria-label="Analysis">
+        <div class="dh"><h2>Analysis</h2><button class="x" id="xR" aria-label="Close panel">&times;</button></div>
+        <div class="db">
+          <div id="vcard"></div>
+          <div id="summary"></div>
+          <h2 class="s" style="margin-top:18px">Districts ranked</h2>
+          <div class="tblwrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+          <p class="sub">Averages are over villages in the Census 2011 table. Towns are not in it, so Dimapur and Kohima towns are under-represented, although the built-up base map shows them.</p>
+        </div>
+      </aside>
+
+      <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">&minus;</button><button id="zfit" aria-label="Show all Nagaland" title="Show all">&#8962;</button></div>
+      <div class="legend" id="legend"></div>
+      <div class="bop" id="bop" hidden><label for="bopR">Base map opacity</label><input type="range" id="bopR" min="10" max="100" step="5" value="100"><b id="bopV">100%</b></div>
+      <div class="rb"><div class="scalebar" id="scalebar"></div><div class="attr">Context: Natural Earth. Elevation: SRTM. Tree cover: ESA WorldCover. Built-up: GHSL, European Commission JRC. Village areas: SHRUG. Districts: geoBoundaries.</div></div>
+      <div class="tip" id="tip" hidden></div>
+    </section>
+
+    <!-- DATA -->
+    <section class="page scroll" id="pg-data"><div class="wrap">
+      <h2 style="font-size:30px;margin-bottom:8px">Data</h2>
+      <p style="color:var(--muted);max-width:70ch">The main files behind this atlas. They are plain CSV and JSON, so they open in Excel, KNIME, QGIS or Python. Model scores are estimates, not measurements, so please read the About page before using them.</p>
+      <p id="dlmsg" class="sub" aria-live="polite"></p>
+      <div id="dslist"></div>
+
+      <h3 class="sec">Where the underlying data comes from</h3>
+      <div class="tw"><table class="tl"><thead><tr><th>Source</th><th>Used for</th><th>Link</th></tr></thead><tbody>
+        <tr><td>Census of India 2011, village directory, through the SHRUG platform (Development Data Lab)</td><td>Whether a village lists a spring as a water source, population, Scheduled Tribe share, tap and handpump access, village identifiers</td><td><a href="https://www.devdatalab.org/shrug" target="_blank" rel="noopener">devdatalab.org/shrug</a></td></tr>
+        <tr><td>SHRUG village boundaries</td><td>Village areas, and village-level terrain, rainfall, soil and land cover summaries used as predictors</td><td><a href="https://www.devdatalab.org/shrug" target="_blank" rel="noopener">devdatalab.org/shrug</a></td></tr>
+        <tr><td>Global Human Settlement Layer, built-up surface (100 m), European Commission JRC</td><td>Built-up land in 2000, 2010 and 2020, and the growth scenarios</td><td><a href="https://ghsl.jrc.ec.europa.eu" target="_blank" rel="noopener">ghsl.jrc.ec.europa.eu</a></td></tr>
+        <tr><td>geoBoundaries</td><td>District outlines</td><td><a href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoboundaries.org</a></td></tr>
+        <tr><td>SRTM elevation (NASA and USGS), accessed through Google Earth Engine</td><td>Elevation and shaded relief across the whole map, at 150 m</td><td><a href="https://earthengine.google.com" target="_blank" rel="noopener">earthengine.google.com</a></td></tr>
+        <tr><td>ESA WorldCover 2021, accessed through Google Earth Engine</td><td>Tree cover share across the whole map, at 250 m</td><td><a href="https://esa-worldcover.org" target="_blank" rel="noopener">esa-worldcover.org</a></td></tr>
+        <tr><td>Natural Earth (public domain)</td><td>Neighbouring states, rivers, lakes and towns on the map</td><td><a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">naturalearthdata.com</a></td></tr>
+      </tbody></table></div>
+      <p class="sub">Each source has its own terms of use. Check them before reusing the original data. The files above are derived tables made for this project.</p>
+    </div></section>
+
+    <!-- ABOUT -->
+    <section class="page scroll" id="pg-about"><div class="wrap">
+      <h2 style="font-size:30px;margin-bottom:18px">About this project</h2>
+      <div class="about">
+        <nav class="toc" aria-label="On this page" id="toc"></nav>
+        <div>
+          <section id="s-springs"><h3>Springs and springsheds</h3>
+            <p>A spring is a place where groundwater reaches the surface on its own, so people can use the water without pumping <a class="c" href="#ref1">[1]</a>. A springshed is the whole system that feeds a spring: the aquifer under the ground, and the land and watershed above it where rain soaks in <a class="c" href="#ref1">[1]</a>. Looking after a spring therefore means looking after its recharge land, and not only the spot where the water comes out.</p>
+          </section>
+          <section id="s-why"><h3>Why springs matter in the hills</h3>
+            <p>In the hills, springs often take the place of rivers, wells and pipelines. The NITI Aayog working group on Himalayan springs gives some rough national figures <a class="c" href="#ref1">[1]</a>:</p>
+            <div class="tw"><table class="tl"><thead><tr><th>Point</th><th>What the report says</th></tr></thead><tbody>
+              <tr><td>Number of springs</td><td>About 3 million springs lie in the Indian Himalayan Region, out of a rough estimate of 5 million for India.</td></tr>
+              <tr><td>People who depend on them</td><td>The region has nearly 50 million residents, and about 60% of them are estimated to depend on spring water.</td></tr>
+              <tr><td>Nagaland</td><td>Its village table lists spring use in 639 of 1,428 villages (44.7%). The report says this table is only representative and probably understates real use.</td></tr>
+              <tr><td>Decline</td><td>Nearly half of the perennial springs in the region are reported to have dried up or become seasonal.</td></tr>
+              <tr><td>Causes named</td><td>Changes in rainfall and temperature, rising demand for water, land use change including roads and buildings, and drilling that competes with springs for the same aquifers.</td></tr>
+              <tr><td>What it recommends</td><td>A proper inventory of springs and springshed management, which means protecting and recharging the land that feeds each spring. It also notes pilot springshed work in Mokokchung and Tuensang districts of Nagaland.</td></tr>
+            </tbody></table></div>
+            <p>These are figures from the report and are not results of this atlas. This atlas uses a different list of 1,262 villages from the Census, so its counts do not match the report's table.</p>
+          </section>
+          <section id="s-reliance"><h3>What "spring reliance" means here</h3>
+            <p>A village counts as spring-reliant in this atlas when the Census 2011 village directory lists a spring among its water sources <a class="c" href="#ref2">[2]</a>. This is a stand-in. It says that a village reported a spring, and it does not say where the spring is, how much water it gives or how many households use it. It is used because Nagaland has no open map of spring points, and the Census is the only source that treats every village in the same way.</p>
+            <p>Since the springs themselves cannot be seen, the model learns what the surroundings look like in villages that report springs (terrain, soil, rainfall and tree cover) and gives every village a score for how much it resembles them. A high score means the surroundings look like places that report springs. It is a hint on where to look first and it is not proof that a spring exists.</p>
+          </section>
+          <section id="s-aim"><h3>What this academic project asks</h3>
+            <p>The work was made for academic purposes, to test whether open data can support planning around springs where no spring map exists. It asks four questions:</p>
+            <ol>
+              <li><b>Where?</b> Which villages are likely to depend on springs.</li>
+              <li><b>Who?</b> Which of those villages have the greatest need. Need is judged from Scheduled Tribe share and from having no tap or handpump, so that support can reach the villages with fewer alternatives.</li>
+              <li><b>What threatens them?</b> Where new built-up land could press on the land that feeds springs, tested under three growth scenarios.</li>
+              <li><b>What is missing?</b> Local and indigenous knowledge of springs, such as where they are, how they have changed and how villages look after them. This is not yet in the atlas and would need field work and interviews.</li>
+            </ol>
+            <p>The aim is springshed-based planning, which means planning around the land that feeds water sources and not only around village or district boundaries. Real springshed boundaries are not available, so this atlas works at village level and should be seen as a first screening step.</p>
+          </section>
+          <section id="s-shows"><h3>What the atlas shows</h3>
+            <div class="tw"><table class="tl"><thead><tr><th>Layer</th><th>What it means</th></tr></thead><tbody>
+              <tr><td>Model score</td><td>The model's estimated chance, from 0 to 1, that a village lists a spring as a water source in Census 2011. Villages at 0.58 or more are called high reliance, which is the top third of villages (421 of 1,262).</td></tr>
+              <tr><td>Equity score</td><td>The average of three ranks: the model score, the village's Scheduled Tribe share, and whether it has no tap or handpump. A higher value means a greater need for support. It ranks villages against each other, so it is not a poverty measure.</td></tr>
+              <tr><td>Planning zone</td><td>Restore: high reliance and below-median tree cover. Regulate: high reliance and top-quarter built-up growth. Protect: other high reliance villages. Guide growth: high growth only. Monitor: all the rest.</td></tr>
+              <tr><td>Growth scenarios</td><td>What-if runs of new built-up land from 2020 to 2030. Trend continues recent growth (679 ha). Rapid is 1.5 times the trend (1,018 ha). Managed keeps the trend total but steers it away from high reliance villages. They are scenarios, not forecasts.</td></tr>
+            </tbody></table></div>
+          </section>
+          <section id="s-method"><h3>How it was built</h3>
+            <ol>
+              <li><b>Target.</b> For each of 1,262 villages, whether Census 2011 lists a spring as a water source <a class="c" href="#ref2">[2]</a>. 600 villages do and 662 do not, so a plain guess of "no spring" would be right 52.5% of the time. Any model has to beat that.</li>
+              <li><b>Predictors.</b> 21 village-level variables on terrain, rainfall, soil and land cover, linked to village boundaries through the SHRUG platform <a class="c" href="#ref3">[3]</a>.</li>
+              <li><b>Models.</b> Random forest, gradient boosting and logistic regression, built in KNIME.</li>
+              <li><b>Testing.</b> Each model was tested in three ways: on random folds, on 10 km spatial blocks, and by leaving one whole district out. The harder tests are the honest ones, because nearby villages are alike.</li>
+              <li><b>Scores and zones.</b> The model score, the equity score and the planning zones were then calculated for every village.</li>
+              <li><b>Growth.</b> Built-up land in 2000, 2010 and 2020 was measured inside each village area from the Global Human Settlement Layer <a class="c" href="#ref4">[4]</a> to set the trend and build the scenarios.</li>
+            </ol>
+            <p>The most used variables in the tree models were terrain elevation, relief, soil sand content, tree cover, drainage flow and rainfall. These counts show what the model used, not what causes springs.</p>
+          </section>
+          <section id="s-test"><h3>How well it tested</h3>
+            <div class="tw"><table><thead><tr><th>Test</th><th class="n">Random forest</th><th class="n">Gradient boosting</th><th class="n">Logistic</th></tr></thead><tbody>
+              <tr><td>Random folds (area under curve)</td><td class="n">0.704</td><td class="n">0.704</td><td class="n">0.641</td></tr>
+              <tr><td>10 km blocks</td><td class="n">0.674</td><td class="n">0.683</td><td class="n">0.618</td></tr>
+              <tr><td>Leave one district out</td><td class="n">0.569</td><td class="n">0.553</td><td class="n">0.456</td></tr>
+            </tbody></table></div>
+            <p>An area under the curve (AUC) of 0.5 is a coin toss and 1.0 is perfect. The models are modestly useful on nearby unseen land and weak on unseen districts, where they do no better than a simple overlay score (0.572). So the map is best read as a screening aid, and the district-level results should be treated with care.</p>
+          </section>
+          <section id="s-limits"><h3>Known limits and possible errors</h3>
+            <div class="warn"><b>This is a learning project.</b> It was built by a student while learning the tools, and it has not been checked in the field or by an outside reviewer. Some figures, labels or map details may be wrong.</div>
+            <ul>
+              <li><b>Old data.</b> Census 2011 is more than a decade old. Villages and water sources have changed since.</li>
+              <li><b>A stand-in, not a spring map.</b> The target says a village lists a spring as a water source. It does not show where a spring is, whether it flows all year or how much water it gives.</li>
+              <li><b>Towns are missing.</b> The village table has no towns, so urban areas such as Dimapur and Kohima are under-represented in the figures.</li>
+              <li><b>Districts have changed.</b> Nagaland has been divided into more districts since 2011. This atlas uses the 11 districts of the 2011 Census.</li>
+              <li><b>Boundaries do not match exactly.</b> District lines come from a different source than village positions, so some villages sit on the wrong side of a line near district edges. Village areas are simplified to keep the page fast.</li>
+              <li><b>Headquarters are approximate.</b> The district headquarter markers are placed by hand.</li>
+              <li><b>Local knowledge is not included.</b> See the fourth question above.</li>
+              <li><b>Weak transfer to new districts.</b> See the test table above.</li>
+              <li><b>Scenarios are not forecasts.</b> They are simple what-if runs, not predictions of where building will happen.</li>
+              <li><b>Elevation and tree cover maps.</b> The whole-region layers come from SRTM <a class="c" href="#ref7">[7]</a> and ESA WorldCover <a class="c" href="#ref8">[8]</a>, processed in Google Earth Engine <a class="c" href="#ref9">[9]</a>, and are coarser than the originals. They can differ from the village-level terrain and land cover values used by the model, which come from a different source.</li>
+              <li><b>Context map.</b> Neighbouring states, rivers and towns come from Natural Earth <a class="c" href="#ref6">[6]</a> and are for orientation only. Borders shown are not an authority on any boundary.</li>
+            </ul>
+            <p>Please do not use this atlas to site wells or to decide funding without field checks. If you spot an error, please tell the project team so it can be corrected.</p>
+          </section>
+          <section id="s-project"><h3>About the project</h3>
+            <p>This atlas was made for academic purposes, as a learning and research project in planning, using open data only. The data work was done in KNIME, and the website was built to share the results in an easy, visual way.</p>
+            <p>Status: research prototype, version 0.3, November 2026.</p>
+          </section>
+          <section id="s-gloss"><h3>Glossary</h3>
+            <div class="tw"><table class="tl"><tbody>
+              <tr><td>AUC</td><td>A score from 0 to 1 for how well a model ranks spring villages above non-spring villages. 0.5 is a coin toss.</td></tr>
+              <tr><td>Aquifer</td><td>Rock or soil underground that holds and passes water.</td></tr>
+              <tr><td>Overlay score</td><td>A simple weighted sum of map layers, used here as a baseline the models should beat.</td></tr>
+              <tr><td>GHSL</td><td>Global Human Settlement Layer, a satellite-based map of built-up land.</td></tr>
+              <tr><td>SHRUG</td><td>A platform that links Census and other data to village boundaries across India.</td></tr>
+              <tr><td>ha</td><td>Hectare, 10,000 square metres.</td></tr>
+            </tbody></table></div>
+          </section>
+          <section id="s-refs"><h3>References</h3>
+            <ol class="refs">
+              <li id="ref1">Working Group on Inventory and Revival of Springs in Himalayas for Water Security (2017). <i>Report of the NITI Aayog Working Group on Inventory and Revival of Springs in Himalayas for Water Security.</i> Department of Science and Technology, Government of India, December 2017. <a href="https://dst.gov.in/sites/default/files/NITI-Aayog-report-Springs-29Dec2017-FINAL.pdf" target="_blank" rel="noopener">dst.gov.in</a></li>
+              <li id="ref2">Office of the Registrar General and Census Commissioner, India (2011). <i>Census of India 2011: Village and Town Directory.</i> <a href="https://censusindia.gov.in" target="_blank" rel="noopener">censusindia.gov.in</a></li>
+              <li id="ref3">Asher, S., Lunt, T., Matsuura, R. and Novosad, P. (2021). Development research at high geographic resolution: an analysis of night-lights, firms, and poverty in India using the SHRUG open data platform. <i>The World Bank Economic Review,</i> 35(4). <a href="https://www.devdatalab.org/shrug" target="_blank" rel="noopener">devdatalab.org/shrug</a></li>
+              <li id="ref4">European Commission, Joint Research Centre. <i>Global Human Settlement Layer (GHSL), built-up surface.</i> <a href="https://ghsl.jrc.ec.europa.eu" target="_blank" rel="noopener">ghsl.jrc.ec.europa.eu</a></li>
+              <li id="ref5">Runfola, D. et al. (2020). geoBoundaries: a global database of political administrative boundaries. <i>PLOS ONE,</i> 15(4), e0231866. <a href="https://www.geoboundaries.org" target="_blank" rel="noopener">geoboundaries.org</a></li>
+              <li id="ref7">Farr, T. G. et al. (2007). The Shuttle Radar Topography Mission. <i>Reviews of Geophysics,</i> 45, RG2004.</li>
+              <li id="ref8">Zanaga, D. et al. (2022). <i>ESA WorldCover 10 m 2021 v200.</i> European Space Agency. <a href="https://esa-worldcover.org" target="_blank" rel="noopener">esa-worldcover.org</a></li>
+              <li id="ref9">Gorelick, N. et al. (2017). Google Earth Engine: planetary-scale geospatial analysis for everyone. <i>Remote Sensing of Environment,</i> 202, 18-27.</li>
+              <li id="ref6">Natural Earth. Free vector and raster map data, public domain. <a href="https://www.naturalearthdata.com" target="_blank" rel="noopener">naturalearthdata.com</a></li>
+            </ol>
+            <p class="sub">Web pages were last checked in November 2026. Figures in the table above are paraphrased from reference 1 and are not new findings.</p>
+          </section>
+        </div>
+      </div>
+      <footer class="f">Nagaland Springshed Atlas &middot; research prototype &middot; not an official portal</footer>
+    </div></section>
+  </main>
+</div>
+
+<script>
+"use strict";
+const $=s=>document.querySelector(s);
+const fmt=n=>n.toLocaleString("en-IN");
+const f2=n=>n.toFixed(2);
+const f1=n=>n.toLocaleString("en-IN",{minimumFractionDigits:1,maximumFractionDigits:1});
+const cssv=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const SC=["#f4f2dc","#cfe6c8","#8fcdbb","#4ba3b5","#2c6f9e","#27407f"];
+const EQ=["#fff1dc","#fdc98d","#f48f4f","#d4552b","#8f2418"];
+const GR=["#fff4e0","#fdd49e","#fc8d59","#d7301f","#7f0000"];
+const EL=["#dbe9c6","#bfd9a0","#e6dba0","#d5b283","#b07f5c","#8a6a5c","#c9bdb6"];
+const TC=["#f4f2dc","#cfe3b4","#86c081","#35945f","#145f3e"];
+const BASES=[
+  {id:"plain",t:"Plain",d:"Land and district lines only"},
+  {id:"vill",t:"Village boundaries",d:"1,262 village areas"},
+  {id:"elev",t:"Elevation and relief",d:"Whole region, SRTM 150 m with hillshade"},
+  {id:"tree",t:"Tree cover",d:"Whole region, share of each 250 m cell under trees"},
+  {id:"built",t:"Built-up area",d:"Satellite built-up surface (100 m), by year. Covers Nagaland and a small margin"}
+];
+const LAYERS=[
+  {g:"Spring reliance"},
+  {id:"high",t:"High reliance or not",d:"Two classes at the 0.58 cut"},
+  {id:"score",t:"Model score",d:"Estimated spring reliance, 0 to 1"},
+  {g:"Need and planning"},
+  {id:"equity",t:"Equity score",d:"Need: reliance, tribal share, no tap"},
+  {id:"zone",t:"Planning zone",d:"Protect, Restore, Regulate, Guide growth, Monitor"},
+  {g:"New built-up area, 2020 to 2030"},
+  {id:"trend",t:"Trend scenario",d:"Recent growth continues"},
+  {id:"rapid",t:"Rapid scenario",d:"1.5 times the trend"},
+  {id:"managed",t:"Managed scenario",d:"Trend total, steered away from spring villages"}
+];
+const SCN=[["trend","Trend"],["rapid","Rapid"],["managed","Managed"]];
+const ZDESC=["Protect","Regulate","Restore","Guide growth","Monitor"];
+const DATASETS=[
+  {f:"district_summary.csv",t:"District summary",d:"One row per district: villages, high reliance count and share, mean scores, village population, new built-up area under each scenario, and the number of villages in each planning zone.",c:"district, villages, high_reliance_villages, high_reliance_share, mean_model_score, mean_equity_score, village_population_census2011, trend_ha, rapid_ha, managed_ha, zone counts",r:"11 rows",s:"1 KB"},
+  {f:"village_scores.csv",t:"Village scores and zones",d:"One row per village with its position, model score, high reliance flag, equity score, planning zone, population, mean elevation, tree cover share and new built-up area under each scenario.",c:"shrid2, district, longitude, latitude, model_score, high_reliance, equity_score, planning_zone, population_census2011, mean_elevation_m, tree_cover_share, new_builtup_trend_ha, new_builtup_rapid_ha, new_builtup_managed_ha",r:"1,262 rows",s:"124 KB"},
+  {f:"growth_scenarios.csv",t:"Growth scenarios",d:"Total new built-up land from 2020 to 2030 under the Trend, Rapid and Managed scenarios, and the share that falls on high reliance villages.",c:"scenario, new_builtup_ha_2020_2030, share_on_high_reliance_villages",r:"3 rows",s:"1 KB"},
+  {f:"model_performance.csv",t:"Model test results",d:"Area under the curve and accuracy for the three models under three test designs, plus the overlay score baseline and the plain-guess accuracy.",c:"validation_design, folds, rf_auc, gb_auc, lr_auc, rf_accuracy, gb_accuracy, lr_accuracy",r:"3 designs",s:"1 KB"},
+  {f:"variable_ranking.csv",t:"Most used variables",d:"The ten variables the tree models split on most often. This shows model use only, not cause.",c:"rank, variable, total_splits",r:"10 rows",s:"1 KB"},
+  {f:"nagaland_boundaries.json",t:"District and state boundaries",d:"GeoJSON lines for the 11 district boundaries and the state outline, as used in the KNIME map. Open it in QGIS or any GIS tool.",c:"layer, name (line geometry)",r:"12 features",s:"133 KB"},
+  {f:"village_scores_polygons.geojson",t:"Village polygons with scores (GIS)",d:"Georeferenced village areas for GIS, WGS84 (EPSG:4326). Every village carries its scores, zone, population, elevation, tree cover and new built-up values. Open it in QGIS, ArcGIS Pro or any GIS tool. Village areas are approximate Census 2011 shapes from SHRUG.",c:"shrid2, district, longitude, latitude, model_score, high_reliance, equity_score, planning_zone, population_census2011, mean_elevation_m, tree_cover_share, new built-up values (polygon geometry)",r:"1,262 polygons",s:"803 KB"},
+  {f:"village_scores_points.geojson",t:"Village points with scores (GIS)",d:"The same village attributes as points at each village position, WGS84 (EPSG:4326). Lighter and quicker to load for point maps and joins.",c:"same fields as the polygon file (point geometry)",r:"1,262 points",s:"548 KB"}
+];
+const RIMG={},RBND={elev:{x0:91.4988,x1:97.0005,y0:23.4999,y1:28.5287},tree:{x0:91.4979,x1:97.0001,y0:23.4999,y1:28.5282}};
+let D,K,V,P,B,Dst,State,view,W,H,dpr,ctx,heat=null,heatOK=false,drawQ=false,VP,VB,ST,imgs={},BB,playT=null,CT,CB,mapReady=false,firstFit=false;
+
+function rgbOf(h){h=h.replace("#","");return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
+function ramp(stops,t){t=Math.max(0,Math.min(1,t));const p=t*(stops.length-1),i=Math.min(Math.floor(p),stops.length-2),f=p-i;const a=rgbOf(stops[i]),b=rgbOf(stops[i+1]);return [0,1,2].map(k=>Math.round(a[k]+(b[k]-a[k])*f))}
+const rgb=c=>`rgb(${c[0]},${c[1]},${c[2]})`;
+const getj=u=>fetch(u).then(r=>{if(!r.ok)throw new Error(u);return r.json()});
+
+/* ---------- routing ---------- */
+const PAGES=["home","map","data","about"];
+function route(){
+  let h=(location.hash||"#home").slice(1);if(!PAGES.includes(h))h="home";
+  PAGES.forEach(p=>{$("#pg-"+p).classList.toggle("on",p===h)});
+  document.querySelectorAll(".nav a").forEach(a=>{if(a.dataset.p===h)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  if(h==="map"&&mapReady){requestAnimationFrame(()=>{resize();if(!firstFit){firstFit=true;fit(false)}})}
+  if(h==="home"&&mapReady)drawPreview();
+  if(h!=="map")stopPlay();
+}
+addEventListener("hashchange",route);
+
+Promise.all([getj("data.json"),getj("villages_poly.json"),getj("builtup_bounds.json"),getj("context.json")])
+  .then(a=>init(a[0],a[1],a[2],a[3]))
+  .catch(e=>{document.body.insertAdjacentHTML("afterbegin",'<p class="err">The map data could not be loaded. Reload the page to try again.</p>');console.error(e)});
+
+function bboxOf(rings){let a=1e9,b=1e9,c=-1e9,e=-1e9;rings.forEach(r=>r.forEach(p=>{a=Math.min(a,p[0]);b=Math.min(b,p[1]);c=Math.max(c,p[0]);e=Math.max(e,p[1])}));return [a,b,c,e]}
+function init(d,vp,bb,ctxd){
+  D=d;K=Math.cos(26.05*Math.PI/180);BB=bb;
+  V=D.v.map((r,i)=>({i,x:r[0]*K,y:-r[1],d:r[2],z:r[3],s:r[4],e:r[5],p:r[6],trend:r[7],managed:r[8],id:r[9],el:r[10],rapid:r[11],tc:r[12]}));
+  const pr=rings=>rings.map(ring=>ring.map(c=>[c[0]*K,-c[1]]));
+  P=D.districts.map(n=>pr(D.polys[n]));
+  VP=vp.map(pr);VB=VP.map(bboxOf);
+  B=P.map(bboxOf);
+  State=[Math.min(...B.map(b=>b[0])),Math.min(...B.map(b=>b[1])),Math.max(...B.map(b=>b[2])),Math.max(...B.map(b=>b[3]))];
+  CT={countries:ctxd.countries.map(c=>({n:c.n,r:pr(c.r)})),
+      states:ctxd.states.map(s=>{const r=pr(s.r);return {n:s.n,a:s.a,r,b:bboxOf(r)}}),
+      rivers:ctxd.rivers.map(v=>v.l.map(l=>l.map(c=>[c[0]*K,-c[1]]))),
+      lakes:ctxd.lakes.map(l=>pr(l.r)),places:ctxd.places,roads:ctxd.roads.map(r=>r.map(l=>l.map(c=>[c[0]*K,-c[1]])))};
+  CB=[85*K,-32.5,102*K,-18.5];
+  Dst=D.districts.map((n,i)=>stats(V.filter(v=>v.d===i)));Dst.all=stats(V);
+  ST={bases:new Set(),bop:1,year:2020,layer:"high",dist:true,heat:false,pts:true,ctx:true,fd:-1,fz:-1,min:0,sel:-1,vsel:-1,hov:-1,scn:"trend",sort:"score",desc:true,lo:false,ro:false};
+  ["elev","tree"].forEach(q=>{const im=new Image();im.onload=()=>draw();im.src=q==="elev"?"region_elevation.jpg":"region_treecover.jpg";RIMG[q]=im});
+  [2000,2010,2020].forEach(y=>{const im=new Image();im.onload=()=>draw();im.src="builtup_"+y+".png";imgs[y]=im});
+  buildControls();buildHome();buildData();buildAbout();
+  ctx=$("#map").getContext("2d");
+  new ResizeObserver(resize).observe($("#pg-map"));
+  bindMap();
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{draw();drawPreview()});
+  new MutationObserver(()=>{draw();drawPreview()}).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+  mapReady=true;renderAll();route();
+}
+function stats(a){
+  const n=a.length||1,hi=a.filter(v=>v.s>=D.cut).length,z=[0,0,0,0,0],g={};
+  a.forEach(v=>z[v.z]++);
+  SCN.forEach(([k])=>{const tot=a.reduce((q,v)=>q+v[k],0),on=a.filter(v=>v.s>=D.cut).reduce((q,v)=>q+v[k],0);g[k]={tot,share:tot?on/tot:0}});
+  return {n:a.length,hi,hp:hi/n,s:a.reduce((q,v)=>q+v.s,0)/n,e:a.reduce((q,v)=>q+v.e,0)/n,pop:a.reduce((q,v)=>q+v.p,0),z,g};
+}
+function passes(v){
+  if(ST.fd>=0&&v.d!==ST.fd)return false;
+  if(ST.fz>=0&&v.z!==ST.fz)return false;
+  return v.s>=ST.min-1e-9;
+}
+
+/* ---------- home, data, about ---------- */
+function buildHome(){
+  const a=Dst.all;
+  $("#kpis").innerHTML=[[fmt(a.n),"villages mapped"],[fmt(a.hi)+" ("+Math.round(a.hp*100)+"%)","high spring reliance"],["11","districts, Census 2011"],["3","growth scenarios, 2020 to 2030"]].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join("");
+  const rank=D.districts.map((n,i)=>({n,hp:Dst[i].hp,s:Dst[i].s})).sort((x,y)=>y.s-x.s);
+  $("#r1").textContent=`${fmt(a.hi)} of ${fmt(a.n)} villages score 0.58 or more. Of these, ${a.z[2]} fall in a Restore zone, ${a.z[0]} in Protect and ${a.z[1]} in Regulate.`;
+  $("#r2").textContent=`The highest average model scores are in ${rank[0].n} (${f2(rank[0].s)}), ${rank[1].n} (${f2(rank[1].s)}) and ${rank[2].n} (${f2(rank[2].s)}). The lowest is ${rank[10].n} (${f2(rank[10].s)}), where many villages are near the town.`;
+  drawPreview();
+}
+function drawPreview(){
+  const c=$("#prev");if(!c||!D)return;
+  const r=c.getBoundingClientRect();if(!r.width)return;
+  const d=Math.min(devicePixelRatio||1,2);c.width=Math.round(r.width*d);c.height=Math.round(r.height*d);
+  const g=c.getContext("2d");g.setTransform(d,0,0,d,0,0);
+  const w=r.width,h=r.height,bw=State[2]-State[0],bh=State[3]-State[1],s=Math.min((w-40)/bw,(h-40)/bh);
+  const ox=w/2-(State[0]+bw/2)*s,oy=h/2-(State[1]+bh/2)*s;
+  g.fillStyle=cssv("--map-bg");g.fillRect(0,0,w,h);
+  g.beginPath();P.forEach(rs=>rs.forEach(rg=>{g.moveTo(rg[0][0]*s+ox,rg[0][1]*s+oy);for(let i=1;i<rg.length;i++)g.lineTo(rg[i][0]*s+ox,rg[i][1]*s+oy);g.closePath()}));
+  g.fillStyle=cssv("--land");g.fill();g.strokeStyle=cssv("--edge");g.lineWidth=1;g.stroke();
+  const hi=cssv("--high"),ot=cssv("--other");
+  V.forEach(v=>{g.fillStyle=v.s>=D.cut?hi:ot;g.globalAlpha=.85;g.beginPath();g.arc(v.x*s+ox,v.y*s+oy,2.3,0,6.3);g.fill()});
+  g.globalAlpha=1;
+}
+function buildData(){
+  $("#dslist").innerHTML=DATASETS.map((x,i)=>`<div class="ds"><div><h4>${x.t}</h4><p>${x.d}</p><div class="meta">${x.r} &middot; ${x.s} &middot; <code>${x.f}</code></div><div class="meta">Columns: ${x.c}</div></div><div><button class="btn sm" data-i="${i}" type="button">Download</button></div></div>`).join("");
+  document.querySelectorAll("#dslist button").forEach(b=>b.onclick=()=>download(DATASETS[+b.dataset.i]));
+}
+async function download(x){
+  const m=$("#dlmsg");m.textContent="";
+  try{
+    const dl=window.claude&&await window.claude.use("downloads");
+    if(!dl){const a=document.createElement("a");a.href=x.f;a.download=x.f;document.body.appendChild(a);a.click();a.remove();m.textContent="Downloading "+x.f+".";return}
+    const blob=await fetch(x.f).then(r=>r.blob());
+    let fn=x.f;try{await dl.save({filename:fn,data:blob})}catch(e2){if(e2&&e2.code==="declined")throw e2;fn=x.f.replace(/\.geojson$/,".json");if(fn===x.f)throw e2;await dl.save({filename:fn,data:blob})}
+    m.textContent="Saved "+fn+(fn!==x.f?" (GeoJSON content, rename to .geojson if your GIS needs it)":"")+".";
+  }catch(e){m.textContent=e&&e.code==="declined"?"Download cancelled.":"The file could not be saved here. Try again or open it from the link in a new tab.";}
+}
+const SECS=[["s-springs","Springs and springsheds"],["s-why","Why springs matter"],["s-reliance","Spring reliance"],["s-aim","What the project asks"],["s-shows","What it shows"],["s-method","How it was built"],["s-test","How well it tested"],["s-limits","Limits and errors"],["s-project","About the project"],["s-gloss","Glossary"],["s-refs","References"]];
+function buildAbout(){
+  $("#toc").innerHTML=SECS.map(s=>`<button type="button" data-t="${s[0]}">${s[1]}</button>`).join("");
+  document.querySelectorAll("#toc button").forEach(b=>b.onclick=()=>$("#"+b.dataset.t).scrollIntoView({behavior:"smooth",block:"start"}));
+}
+
+/* ---------- map controls ---------- */
+function setPanels(l,r,refit){
+  if(l!==undefined)ST.lo=l;if(r!==undefined)ST.ro=r;
+  const m=$("#pg-map");m.classList.toggle("lo",ST.lo);m.classList.toggle("ro",ST.ro);
+  $("#tL").setAttribute("aria-expanded",String(ST.lo));$("#tR").setAttribute("aria-expanded",String(ST.ro));
+  if(refit!==false)refit_();
+}
+function refit_(){if(!view)return;if(view.fitted)fit(true);else if(ST.sel>=0)fitBox(B[ST.sel],true)}
+function buildControls(){
+  $("#tL").onclick=()=>setPanels(true,undefined);$("#xL").onclick=()=>setPanels(false,undefined);
+  $("#tR").onclick=()=>setPanels(undefined,true);$("#xR").onclick=()=>setPanels(undefined,false);
+  addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#pg-map").classList.contains("on")&&!$("#sug").hidden===false){if(ST.lo||ST.ro)setPanels(false,false)}});
+  $("#bases").innerHTML=BASES.filter(l=>l.id!=="plain").map(l=>`<label class="opt"><input type="checkbox" name="base" value="${l.id}"><div><b>${l.t}</b><span>${l.d}</span></div></label>`).join("")+'<div class="foot"><button class="link" type="button" id="baseClear">Clear all</button><button class="link" type="button" id="baseDone">Done</button></div>';
+  const bBtn=$("#basesBtn"),bPan=$("#bases"),bOpen=o=>{bPan.hidden=!o;bBtn.setAttribute("aria-expanded",String(o))};
+  bBtn.onclick=()=>bOpen(bPan.hidden);$("#baseDone").onclick=()=>bOpen(false);
+  document.addEventListener("click",e=>{if(!bPan.hidden&&!$("#msel").contains(e.target))bOpen(false)});
+  bPan.addEventListener("keydown",e=>{if(e.key==="Escape"){bOpen(false);bBtn.focus()}});
+  document.querySelectorAll('input[name=base]').forEach(r=>r.addEventListener("change",()=>{if(r.checked)ST.bases.add(r.value);else ST.bases.delete(r.value);baseChanged()}));
+  $("#baseClear").onclick=()=>{ST.bases.clear();baseChanged()};
+  baseDesc();
+  $("#bopR").addEventListener("input",e=>{ST.bop=+e.target.value/100;$("#bopV").textContent=e.target.value+"%";draw()});
+  $("#yearsRow").querySelectorAll("button[data-y]").forEach(b=>b.onclick=()=>{setYear(+b.dataset.y);stopPlay()});
+  $("#play").onclick=()=>{if(playT)stopPlay();else startPlay()};
+  $("#layers").innerHTML=LAYERS.map(l=>l.g?`<h4>${l.g}</h4>`:`<label class="opt"><input type="radio" name="layer" value="${l.id}" ${l.id==="high"?"checked":""}><div><b>${l.t}</b><span>${l.d}</span></div></label>`).join("");
+  document.querySelectorAll('input[name=layer]').forEach(r=>r.addEventListener("change",()=>setLayer(r.value)));
+  $("#ovCtx").addEventListener("change",e=>{ST.ctx=e.target.checked;draw()});
+  $("#ovDist").addEventListener("change",e=>{ST.dist=e.target.checked;renderLegend();draw()});
+  $("#ovPts").addEventListener("change",e=>{ST.pts=e.target.checked;draw()});
+  $("#ovHeat").addEventListener("change",e=>{ST.heat=e.target.checked;heatDirty();renderAll()});
+  $("#fDist").innerHTML='<option value="-1">All districts</option>'+D.districts.map((n,i)=>`<option value="${i}">${n}</option>`).join("");
+  $("#fZone").innerHTML='<option value="-1">All zones</option>'+ZDESC.map((n,i)=>`<option value="${i}">${n}</option>`).join("");
+  $("#fDist").addEventListener("change",e=>selectDistrict(+e.target.value,true));
+  $("#fZone").addEventListener("change",e=>{ST.fz=+e.target.value;heatDirty();renderAll()});
+  $("#fScore").addEventListener("input",e=>{ST.min=+e.target.value;$("#fScoreV").textContent=f2(ST.min);heatDirty();renderAll()});
+  $("#reset").onclick=()=>{ST.fz=-1;ST.min=0;$("#fZone").value="-1";$("#fScore").value=0;$("#fScoreV").textContent="0.00";ST.vsel=-1;selectDistrict(-1,true)};
+  $("#zin").onclick=()=>zoomBy(1.6);$("#zout").onclick=()=>zoomBy(1/1.6);
+  $("#zfit").onclick=()=>{selectDistrict(-1,false);fit(true)};
+  bindSearch();
+}
+function setLayer(id){
+  ST.layer=id;if(["trend","rapid","managed"].includes(id))ST.scn=id;
+  const r=document.querySelector(`input[name=layer][value=${id}]`);if(r)r.checked=true;renderAll();
+}
+function baseDesc(){
+  document.querySelectorAll('input[name=base]').forEach(r=>r.checked=ST.bases.has(r.value));
+  const on=BASES.filter(b=>ST.bases.has(b.id)).map(b=>b.t);$("#basesLbl").textContent=on.length?on.join(", "):"Plain";
+  $("#yearsRow").hidden=!ST.bases.has("built");
+  $("#bop").hidden=!["elev","tree","built"].some(q=>ST.bases.has(q));
+}
+function baseChanged(){baseDesc();if(!ST.bases.has("built"))stopPlay();renderLegend();draw()}
+function setYear(y){ST.year=y;$("#yearsRow").querySelectorAll("button[data-y]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.y===y)));renderLegend();draw()}
+function startPlay(){const seq=[2000,2010,2020];let k=seq.indexOf(ST.year);ST.bases.add("built");baseDesc();renderLegend();
+  $("#play").setAttribute("aria-pressed","true");$("#play").textContent="Pause";
+  playT=setInterval(()=>{k=(k+1)%3;setYear(seq[k])},1100);setYear(seq[k])}
+function stopPlay(){if(playT){clearInterval(playT);playT=null}const p=$("#play");if(p){p.setAttribute("aria-pressed","false");p.textContent="Play"}}
+
+/* ---------- search ---------- */
+let sugItems=[],sugI=-1;
+function bindSearch(){
+  const q=$("#q"),box=$("#sug");
+  const close=()=>{box.hidden=true;q.setAttribute("aria-expanded","false");sugI=-1};
+  const open=()=>{box.hidden=false;q.setAttribute("aria-expanded","true")};
+  function build(){
+    const t=q.value.trim().toLowerCase();sugItems=[];
+    D.districts.forEach((n,i)=>{if(!t||n.toLowerCase().includes(t))sugItems.push({k:"d",i,label:n,sub:Dst[i].n+" villages"})});
+    if(t.length>=3){let c=0;for(const v of V){if(v.id.toLowerCase().includes(t)){sugItems.push({k:"v",i:v.i,label:v.id,sub:D.districts[v.d]});if(++c>=5)break}}}
+    let h="",lastK="";
+    sugItems.forEach((s,j)=>{if(s.k!==lastK){h+=`<h5>${s.k==="d"?"Districts":"Villages"}</h5>`;lastK=s.k}h+=`<button type="button" role="option" data-j="${j}" aria-selected="${j===sugI}"><span>${s.label}</span><small>${s.sub}</small></button>`});
+    box.innerHTML=h||'<div style="padding:10px 12px;color:var(--muted)">No match. Try Kohima, or a village ID.</div>';open();
+    box.querySelectorAll("button").forEach(b=>b.onmousedown=e=>{e.preventDefault();choose(sugItems[+b.dataset.j])});
+  }
+  function choose(s){
+    if(!s)return;close();q.blur();
+    if(location.hash!=="#map")location.hash="#map";
+    const doIt=()=>{
+      if(s.k==="d"){q.value=D.districts[s.i];selectDistrict(s.i,true);setPanels(undefined,true,false);refitSoon()}
+      else{const v=V[s.i];q.value=v.id;ST.vsel=s.i;ST.fd=-1;ST.sel=-1;$("#fDist").value="-1";renderAll();setPanels(undefined,true,false);const pd=padsNow(),sc=5200;go({s:sc,tx:pd.l+(W-pd.l-pd.r)/2-v.x*sc,ty:H/2-v.y*sc,fitted:false},true)}
+    };
+    setTimeout(doIt,location.hash==="#map"?60:120);
+  }
+  q.addEventListener("focus",build);q.addEventListener("input",()=>{sugI=-1;build()});
+  q.addEventListener("blur",()=>setTimeout(close,120));
+  q.addEventListener("keydown",e=>{
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();if(box.hidden)build();const n=sugItems.length;if(!n)return;sugI=(sugI+(e.key==="ArrowDown"?1:-1)+n)%n;
+      box.querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",String(+b.dataset.j===sugI)));box.querySelector(`button[data-j="${sugI}"]`)?.scrollIntoView({block:"nearest"})}
+    else if(e.key==="Enter"){e.preventDefault();if(sugI<0)build();choose(sugItems[Math.max(0,sugI)])}
+    else if(e.key==="Escape")close();
+  });
+}
+function refitSoon(){setTimeout(()=>{if(ST.sel>=0)fitBox(B[ST.sel],true)},40)}
+
+function selectDistrict(i,zoom){
+  ST.sel=i;ST.fd=i;$("#fDist").value=String(i);heatDirty();
+  if(i>=0){if(zoom!==false)fitBox(B[i],true);if(innerWidth>900||!ST.lo)setPanels(undefined,true,false)}else if(zoom)fit(true);
+  renderAll();
+}
+function renderAll(){renderLegend();renderSummary();renderTable();renderVillage();$("#count").textContent=`Showing ${fmt(V.filter(passes).length)} of ${fmt(V.length)} villages`;draw()}
+
+/* ---------- legend ---------- */
+function gradCss(stops){return `linear-gradient(90deg,${stops.join(",")})`}
+function renderLegend(){
+  let h="";
+  if(ST.layer==="high")h=`<h3>Spring reliance</h3><div class="row"><i class="sw" style="background:var(--high)"></i>High reliance (score 0.58 or more)</div><div class="row"><i class="sw" style="background:var(--other)"></i>Other villages</div>`;
+  else if(ST.layer==="score")h=`<h3>Model score</h3><div class="bar" style="background:${gradCss(SC)}"></div><div class="scale"><span>0</span><span>0.5</span><span>1</span></div><div class="sub">Higher means more likely to rely on a spring</div>`;
+  else if(ST.layer==="equity")h=`<h3>Equity score</h3><div class="bar" style="background:${gradCss(EQ)}"></div><div class="scale"><span>0</span><span>0.5</span><span>1</span></div><div class="sub">Higher means greater need</div>`;
+  else if(ST.layer==="zone")h=`<h3>Planning zone</h3>`+ZDESC.map((n,i)=>`<div class="row"><i class="sw" style="background:var(--z${i})"></i>${n}</div>`).join("");
+  else h=`<h3>New built-up area, ${SCN.find(s=>s[0]===ST.layer)[1].toLowerCase()} scenario</h3><div class="bar" style="background:${gradCss(GR)}"></div><div class="scale"><span>0</span><span>0.6</span><span>2.5 ha or more</span></div><div class="sub">Hectares per village, 2020 to 2030</div>`;
+  if(ST.heat)h+=`<h3 class="n">Surface</h3><div class="bar" style="background:${gradCss(SC)}"></div><div class="scale"><span>low</span><span>high</span></div><div class="sub">Local average of the model score</div>`;
+  if(ST.bases.has("built"))h+=`<h3 class="n">Built-up area ${ST.year}</h3><div class="bar" style="background:linear-gradient(90deg,rgba(168,58,20,.5),rgba(168,58,20,1))"></div><div class="scale"><span>little</span><span>dense</span></div><div class="sub">Built-up land is a small share of the hills, so it appears as scattered specks and clusters. Zoom in to see them</div>`;
+  if(ST.bases.has("elev"))h+=`<h3 class="n">Elevation and relief</h3><div class="bar" style="background:linear-gradient(90deg,#d7e8c3 0%,#bfd9a0 5%,#e6dba0 15%,#d5b283 27%,#b07f5c 45%,#9a8478 73%,#f2f0ee 100%)"></div><div class="scale"><span>0 m</span><span>1,500 m</span><span>5,500 m</span></div><div class="sub">Shaded to show slopes. Source: SRTM, 150 m</div>`;
+  if(ST.bases.has("tree"))h+=`<h3 class="n">Tree cover</h3><div class="bar" style="background:${gradCss(TC)}"></div><div class="scale"><span>0%</span><span>50%</span><span>100%</span></div><div class="sub">Share of each 250 m cell under trees. Source: ESA WorldCover 2021</div>`;
+  if(ST.bases.has("vill"))h+=`<h3 class="n">Base</h3><div class="row"><i style="width:14px;height:0;border-top:1.5px solid var(--edge);flex:none"></i>Village boundary</div>`;
+  h+=`<div class="row" style="margin-top:8px"><i style="width:16px;height:0;border-top:4px solid var(--ink);flex:none"></i>State boundary</div>`;
+  if(ST.dist)h+=`<div class="row"><i style="width:16px;height:0;border-top:2px solid var(--ink);flex:none"></i>District boundary</div><div class="row"><i class="sq"></i>District headquarters (approximate)</div>`;
+  $("#legend").innerHTML=h;
+}
+/* ---------- analysis panel ---------- */
+function renderSummary(){
+  const i=ST.sel,s=i>=0?Dst[i]:Dst.all,name=i>=0?D.districts[i]+" district":"All of Nagaland";
+  $("#summary").innerHTML=`<div class="vtitle"><h2 style="font-size:18px">${name}</h2>${i>=0?'<button class="link" id="showAll">Show all</button>':""}</div>
+  <div class="stats">
+    <div class="stat"><b>${fmt(s.n)}</b><span>villages</span></div>
+    <div class="stat"><b>${fmt(s.hi)} <small style="font-size:13px;color:var(--muted)">${Math.round(s.hp*100)}%</small></b><span>high reliance</span></div>
+    <div class="stat"><b>${f2(s.s)}</b><span>mean model score</span></div>
+    <div class="stat"><b>${f2(s.e)}</b><span>mean equity score</span></div>
+  </div>
+  <div class="stat" style="margin-bottom:10px"><b>${fmt(s.pop)}</b><span>population of the villages in this table, Census 2011 (towns not included, so lower than the district total)</span></div>
+  <h2 class="s" style="margin-top:14px">Planning zones</h2>
+  <div class="mix" role="img" aria-label="Zone mix">${s.z.map((c,k)=>`<i style="width:${c/s.n*100}%;background:var(--z${k})"></i>`).join("")}</div>
+  <div class="mixl">${s.z.map((c,k)=>`<div><i class="sw" style="background:var(--z${k})"></i>${ZDESC[k]}<em>${fmt(c)} · ${Math.round(c/s.n*100)}%</em></div>`).join("")}</div>
+  <h2 class="s" style="margin-top:18px">New built-up area, 2020 to 2030</h2>
+  <div class="gro" role="group" aria-label="Growth scenario">${SCN.map(([k,n])=>{const g=s.g[k];return `<button type="button" data-k="${k}" aria-pressed="${ST.scn===k}"><b>${n}</b><em>${f1(g.tot)} ha</em><i><u style="width:${Math.round(g.share*100)}%"></u></i><small>${Math.round(g.share*100)}% falls on high reliance villages</small></button>`}).join("")}</div>
+  <p class="sub">Scenarios, not forecasts. Pick one to colour the map by it.</p>`;
+  const b=$("#showAll");if(b)b.onclick=()=>selectDistrict(-1,true);
+  document.querySelectorAll(".gro button").forEach(x=>x.onclick=()=>setLayer(x.dataset.k));
+}
+function renderTable(){
+  const cols=[["name","District"],["n","Villages"],["hp","High %"],["score","Score"]];
+  $("#tbl thead").innerHTML="<tr>"+cols.map(c=>`<th scope="col"><button data-k="${c[0]}" aria-pressed="${ST.sort===c[0]}">${c[1]}${ST.sort===c[0]?(ST.desc?" ↓":" ↑"):""}</button></th>`).join("")+"</tr>";
+  const rows=D.districts.map((n,i)=>({i,name:n,n:Dst[i].n,hp:Dst[i].hp,score:Dst[i].s}));
+  rows.sort((a,b)=>{const k=ST.sort,r=k==="name"?a.name.localeCompare(b.name):a[k]-b[k];return ST.desc?-r:r});
+  $("#tbl tbody").innerHTML=rows.map(r=>`<tr data-i="${r.i}" class="${ST.sel===r.i?"on":""}" tabindex="0"><td>${r.name}</td><td>${r.n}</td><td><i class="mini" style="width:${Math.round(r.hp*34)}px"></i>${Math.round(r.hp*100)}%</td><td>${f2(r.score)}</td></tr>`).join("");
+  document.querySelectorAll("#tbl th button").forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(ST.sort===k)ST.desc=!ST.desc;else{ST.sort=k;ST.desc=k!=="name"}renderTable()});
+  document.querySelectorAll("#tbl tbody tr").forEach(tr=>{const g=()=>selectDistrict(+tr.dataset.i,true);tr.onclick=g;tr.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();g()}}});
+}
+function renderVillage(){
+  const v=V[ST.vsel];
+  if(!v){$("#vcard").innerHTML="";return}
+  const hi=v.s>=D.cut;
+  $("#vcard").innerHTML=`<div class="card"><div class="vtitle"><h2 style="font-size:16px">Village</h2><button class="link" id="vclose">Close</button></div>
+  <div style="margin-top:6px"><span class="pill" style="background:${cssv("--z"+v.z)}">${ZDESC[v.z]}</span> <span class="pill" style="background:${hi?"var(--high)":"var(--other)"}">${hi?"High reliance":"Other"}</span></div>
+  <dl><dt>District</dt><dd>${D.districts[v.d]}</dd><dt>Model score</dt><dd>${f2(v.s)}</dd><dt>Equity score</dt><dd>${f2(v.e)}</dd><dt>Population</dt><dd>${fmt(v.p)}</dd>
+  <dt>Mean elevation</dt><dd>${fmt(v.el)} m</dd><dt>Tree cover</dt><dd>${Math.round(v.tc*100)}%</dd>
+  <dt>New built-up, trend</dt><dd>${f2(v.trend)} ha</dd><dt>New built-up, rapid</dt><dd>${f2(v.rapid)} ha</dd><dt>New built-up, managed</dt><dd>${f2(v.managed)} ha</dd><dt>Village ID</dt><dd style="font-size:11.5px;word-break:break-all">${v.id}</dd></dl></div>`;
+  $("#vclose").onclick=()=>{ST.vsel=-1;renderVillage();draw()};
+}
+
+/* ---------- view ---------- */
+function padsNow(){return innerWidth>900?{l:ST.lo?336:0,r:ST.ro?370:0}:{l:0,r:0}}
+function resize(){
+  const w=$("#pg-map");if(!ctx||!w.clientWidth)return;dpr=Math.min(window.devicePixelRatio||1,2);
+  W=w.clientWidth;H=w.clientHeight;const c=$("#map");c.width=Math.round(W*dpr);c.height=Math.round(H*dpr);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(!view){fit(false);firstFit=true}else if(view.fitted)fit(false);else draw();
+}
+function fitBox(b,anim){
+  const pd=padsNow(),pad=40,top=64,bot=pad+70,bw=b[2]-b[0],bh=b[3]-b[1];
+  const aw=W-pd.l-pd.r,s=Math.min((aw-pad*2)/bw,(H-top-bot)/bh);
+  go({s,tx:pd.l+aw/2-(b[0]+bw/2)*s,ty:top+(H-top-bot)/2-(b[1]+bh/2)*s,fitted:b===State},anim);
+}
+function fit(anim){if(W)fitBox(State,anim)}
+function go(t,anim){
+  if(!anim||!view){view=t;draw();return}
+  const a={...view},t0=performance.now(),dur=320;
+  (function step(now){
+    const k=Math.min(1,(now-t0)/dur),e=1-Math.pow(1-k,3);
+    view={s:a.s+(t.s-a.s)*e,tx:a.tx+(t.tx-a.tx)*e,ty:a.ty+(t.ty-a.ty)*e,fitted:k===1?t.fitted:false};
+    draw();if(k<1)requestAnimationFrame(step);
+  })(t0);
+}
+function zoomAt(f,px,py){
+  const s0=view.s,s=Math.max(minZoom(),Math.min(s0*f,60000));f=s/s0;
+  view={s,tx:px-(px-view.tx)*f,ty:py-(py-view.ty)*f,fitted:false};clampView();draw();
+}
+function minZoom(){return Math.max(W/(CB[2]-CB[0]),H/(CB[3]-CB[1]))*1.02}
+function clampView(){const s=view.s;view.tx=Math.min(-CB[0]*s,Math.max(W-CB[2]*s,view.tx));view.ty=Math.min(-CB[1]*s,Math.max(H-CB[3]*s,view.ty))}
+function zoomBy(f){const pd=padsNow();zoomAt(f,pd.l+(W-pd.l-pd.r)/2,H/2)}
+const sx=x=>x*view.s+view.tx, sy=y=>y*view.s+view.ty;
+
+/* ---------- heat surface ---------- */
+function heatDirty(){heatOK=false}
+function buildHeat(){
+  const c=0.02,sig=0.09,R=Math.ceil(2.5*sig/c);
+  const gw=Math.ceil((State[2]-State[0])/c)+2*R,gh=Math.ceil((State[3]-State[1])/c)+2*R;
+  const num=new Float32Array(gw*gh),den=new Float32Array(gw*gh);
+  const ox=State[0]-R*c,oy=State[1]-R*c;
+  V.forEach(v=>{if(!passes(v))return;
+    const cx=(v.x-ox)/c,cy=(v.y-oy)/c,ix=Math.floor(cx),iy=Math.floor(cy);
+    for(let gy=iy-R;gy<=iy+R;gy++)for(let gx=ix-R;gx<=ix+R;gx++){
+      if(gx<0||gy<0||gx>=gw||gy>=gh)continue;
+      const dx=(gx+.5-cx)*c,dy=(gy+.5-cy)*c,w=Math.exp(-(dx*dx+dy*dy)/(2*sig*sig));
+      num[gy*gw+gx]+=w*v.s;den[gy*gw+gx]+=w}
+  });
+  const cv=document.createElement("canvas");cv.width=gw;cv.height=gh;
+  const g=cv.getContext("2d"),im=g.createImageData(gw,gh);
+  for(let k=0;k<gw*gh;k++){
+    const d=den[k];if(d<0.02)continue;
+    const m=num[k]/d,col=ramp(SC,(m-0.25)/0.55);
+    im.data[k*4]=col[0];im.data[k*4+1]=col[1];im.data[k*4+2]=col[2];im.data[k*4+3]=Math.round(255*0.88*(1-Math.exp(-d/0.7)));
+  }
+  g.putImageData(im,0,0);heat={cv,ox,oy,c,gw,gh};heatOK=true;
+}
+
+/* ---------- drawing ---------- */
+function draw(){
+  if(drawQ||!ctx||!view||!W)return;drawQ=true;
+  requestAnimationFrame(()=>{drawQ=false;paint()});
+}
+function polyPath(g,rings){rings.forEach(r=>{g.moveTo(sx(r[0][0]),sy(r[0][1]));for(let i=1;i<r.length;i++)g.lineTo(sx(r[i][0]),sy(r[i][1]));g.closePath()})}
+function linePath(g,l){g.moveTo(sx(l[0][0]),sy(l[0][1]));for(let i=1;i<l.length;i++)g.lineTo(sx(l[i][0]),sy(l[i][1]))}
+function visB(b){return !(sx(b[2])<-5||sx(b[0])>W+5||sy(b[3])<-5||sy(b[1])>H+5)}
+function pointColor(v,c){
+  switch(ST.layer){
+    case "high":return v.s>=D.cut?c.hi:c.ot;
+    case "score":return rgb(ramp(SC,v.s));
+    case "equity":return rgb(ramp(EQ,v.e));
+    case "zone":return c.z[v.z];
+    default:return rgb(ramp(GR,Math.sqrt(v[ST.layer]/2.5)));
+  }
+}
+function layerKey(v){return ST.layer==="high"?(v.s>=D.cut?1:0):ST.layer==="score"?v.s:ST.layer==="equity"?v.e:ST.layer==="zone"?(4-v.z):v[ST.layer]}
+function drawContext(g,k,part){
+  g.lineJoin="round";
+  if(part!==2){
+  g.beginPath();CT.countries.forEach(c=>polyPath(g,c.r));g.fillStyle=k.ctx;g.fill();
+  g.beginPath();CT.lakes.forEach(l=>polyPath(g,l));g.fillStyle=k.water;g.fill();
+  }
+  if(part===1)return;
+  g.strokeStyle=k.vedge;g.lineWidth=0.9;g.beginPath();CT.states.forEach(s=>{if(s.n!=="Nagaland"&&visB(s.b))polyPath(g,s.r)});g.stroke();
+  g.strokeStyle=k.edge;g.lineWidth=1.3;g.beginPath();CT.countries.forEach(c=>polyPath(g,c.r));g.stroke();
+  g.strokeStyle=k.road;g.lineWidth=view.s>1200?1.4:0.9;g.beginPath();CT.roads.forEach(r=>r.forEach(l=>linePath(g,l)));g.stroke();
+  g.strokeStyle=k.water;g.lineWidth=Math.max(1.2,Math.min(3,view.s/700));g.lineCap="round";
+  g.beginPath();CT.rivers.forEach(r=>r.forEach(l=>linePath(g,l)));g.stroke();
+  g.font="italic 500 "+(view.s>1500?13:11)+"px "+cssv("--font-b");g.textAlign="center";g.textBaseline="middle";
+  const names=["Assam","Arunachal Pradesh","Manipur","Mizoram","Meghalaya","Tripura","Sagaing","Kachin","Chin","Shan","Xizang","Rakhine","Bago","Mandalay","Magway","Sikkim","West Bengal","Bihar","Yunnan","Kayah"];
+  CT.states.forEach(s=>{
+    if(!names.includes(s.n)||!visB(s.b))return;
+    const x0=Math.max(sx(s.b[0]),0),x1=Math.min(sx(s.b[2]),W),y0=Math.max(sy(s.b[1]),0),y1=Math.min(sy(s.b[3]),H);
+    if(x1-x0<80||y1-y0<30)return;
+    const nm=s.n==="Xizang"?"Tibet (China)":s.n;
+    const cx=(x0+x1)/2,cy=(y0+y1)/2;g.strokeStyle=k.halo;g.lineWidth=3;g.strokeText(nm,cx,cy);g.fillStyle=k.lab;g.fillText(nm,cx,cy);
+  });
+  g.font="500 11px "+cssv("--font-b");g.textAlign="left";
+  CT.places.forEach(p=>{const x=sx(p[2]*K),y=sy(-p[1]);if(x<-10||y<-10||x>W+10||y>H+10)return;
+    g.fillStyle=k.lab;g.beginPath();g.arc(x,y,2.6,0,6.3);g.fill();g.strokeStyle=k.halo;g.lineWidth=3;g.strokeText(p[0],x+6,y);g.fillStyle=k.lab;g.fillText(p[0],x+6,y)});
+}
+function paint(){
+  const g=ctx,k={bg:cssv("--map-bg"),ctx:cssv("--ctx"),water:cssv("--water"),road:cssv("--road"),lab:cssv("--lab"),land:cssv("--land"),edge:cssv("--edge"),state:cssv("--state"),acc:cssv("--accent"),vedge:cssv("--vedge"),ink:cssv("--ink"),halo:cssv("--halo")};
+  g.clearRect(0,0,W,H);g.fillStyle=k.bg;g.fillRect(0,0,W,H);
+  const bs=ST.bases,RB=bs.has("elev")||bs.has("tree");
+  if(ST.ctx)drawContext(g,k,RB?1:0);
+  g.lineJoin="round";g.beginPath();P.forEach(r=>polyPath(g,r));g.fillStyle=k.land;g.fill();
+  if(RB){
+    g.save();g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";
+    ["elev","tree"].forEach(q=>{if(!bs.has(q))return;const im=RIMG[q],bd=RBND[q];
+      if(im&&im.complete&&im.naturalWidth){g.globalAlpha=((q==="tree"&&bs.has("elev"))?.55:1)*ST.bop;
+        g.drawImage(im,sx(bd.x0*K),sy(-bd.y1),(bd.x1-bd.x0)*K*view.s,(bd.y1-bd.y0)*view.s)}});
+    g.restore();
+    if(ST.ctx)drawContext(g,k,2);
+  }
+  if(bs.has("built")){
+    const im=imgs[ST.year];
+    if(im&&im.complete&&im.naturalWidth){
+      g.save();g.imageSmoothingEnabled=true;g.globalAlpha=ST.bop;
+      const X0=BB.x0*K,X1=BB.x1*K;
+      g.drawImage(im,sx(X0),sy(-BB.y1),(X1-X0)*view.s,(BB.y1-BB.y0)*view.s);g.restore();
+    }
+  }
+  if(bs.has("vill")){
+    g.save();g.beginPath();P.forEach(r=>polyPath(g,r));g.clip();
+    g.beginPath();for(let i=0;i<VP.length;i++){if(visB(VB[i]))polyPath(g,VP[i])}
+    g.strokeStyle=k.vedge;g.lineWidth=0.8;g.stroke();g.restore();
+  }
+  if(ST.heat){
+    if(!heatOK)buildHeat();
+    g.save();g.beginPath();(ST.sel>=0?[P[ST.sel]]:P).forEach(r=>polyPath(g,r));g.clip();
+    g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";
+    g.drawImage(heat.cv,sx(heat.ox),sy(heat.oy),heat.gw*heat.c*view.s,heat.gh*heat.c*view.s);
+    g.restore();
+  }
+  if(ST.hov>=0){g.strokeStyle=k.ink;g.lineWidth=1.6;g.beginPath();polyPath(g,VP[ST.hov]);g.stroke()}
+  if(ST.vsel>=0){g.strokeStyle=k.acc;g.lineWidth=2.2;g.beginPath();polyPath(g,VP[ST.vsel]);g.stroke()}
+  const rad=Math.max(2,Math.min(6.5,1.1+Math.sqrt(view.s/320)*1.5));
+  const c={hi:cssv("--high"),ot:cssv("--other"),z:[0,1,2,3,4].map(q=>cssv("--z"+q))};
+  if(ST.pts){
+    const list=V.filter(passes);list.sort((a,b)=>layerKey(a)-layerKey(b));
+    g.globalAlpha=0.9;g.lineWidth=0.7;g.strokeStyle=k.land;
+    for(const v of list){
+      const x=sx(v.x),y=sy(v.y);if(x<-8||y<-8||x>W+8||y>H+8)continue;
+      g.fillStyle=pointColor(v,c);g.beginPath();g.arc(x,y,rad,0,6.2832);g.fill();if(!ST.heat)g.stroke();
+    }
+    g.globalAlpha=1;
+  }
+  g.lineJoin="round";g.lineCap="round";
+  if(ST.dist){g.beginPath();P.forEach(r=>polyPath(g,r));g.strokeStyle=k.halo;g.lineWidth=5;g.stroke();g.strokeStyle=k.ink;g.lineWidth=2;g.stroke()}
+  g.save();g.beginPath();g.rect(-10,-10,W+20,H+20);P.forEach(r=>polyPath(g,r));g.clip("evenodd");
+  g.beginPath();P.forEach(r=>polyPath(g,r));g.strokeStyle=k.halo;g.lineWidth=12;g.stroke();g.strokeStyle=k.ink;g.lineWidth=7;g.stroke();g.restore();
+  g.beginPath();P.forEach(r=>polyPath(g,r));g.strokeStyle=k.ink;g.lineWidth=2;g.stroke();
+  if(ST.sel>=0){g.strokeStyle=k.acc;g.lineWidth=3.5;g.beginPath();polyPath(g,P[ST.sel]);g.stroke()}
+  if(ST.vsel>=0){const v=V[ST.vsel];g.strokeStyle=k.ink;g.lineWidth=2;g.beginPath();g.arc(sx(v.x),sy(v.y),rad+4,0,6.2832);g.stroke()}
+  if(ST.dist){
+    g.font="600 11px "+cssv("--font-b");g.textAlign="left";g.textBaseline="middle";g.lineJoin="round";
+    D.hq.forEach(h=>{
+      const x=sx(h[2]*K),y=sy(-h[1]);if(x<-20||y<-20||x>W+20||y>H+20)return;
+      g.fillStyle=k.ink;g.strokeStyle=k.land;g.lineWidth=1.5;g.fillRect(x-4,y-4,8,8);g.strokeRect(x-4,y-4,8,8);
+      g.strokeStyle=k.halo;g.lineWidth=3.5;g.strokeText(h[0],x+8,y);g.fillStyle=k.ink;g.fillText(h[0],x+8,y);
+    });
+  }
+  scaleBar();
+}
+function scaleBar(){
+  const kmPerPx=111.2/view.s,targets=[0.5,1,2,5,10,20,50,100,200];
+  let km=targets[0];for(const t of targets){if(t/kmPerPx<=130)km=t}
+  $("#scalebar").innerHTML=`<i style="width:${km/kmPerPx}px"></i>${km} km`;
+}
+
+/* ---------- interaction ---------- */
+function nearest(px,py){
+  let best=-1,bd=1e9;const r=Math.max(7,Math.min(6.5,1.1+Math.sqrt(view.s/320)*1.5)+4);
+  if(!ST.pts)return -1;
+  for(const v of V){if(!passes(v))continue;const dx=sx(v.x)-px,dy=sy(v.y)-py,d=dx*dx+dy*dy;if(d<bd){bd=d;best=v.i}}
+  return bd<=r*r?best:-1;
+}
+function inRing(r,x,y){let c=false;for(let i=0,j=r.length-1;i<r.length;j=i++){const a=r[i],b=r[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c}
+function districtAt(px,py){const x=(px-view.tx)/view.s,y=(py-view.ty)/view.s;for(let i=0;i<P.length;i++)for(const r of P[i])if(inRing(r,x,y))return i;return -1}
+function villageAt(px,py){
+  const x=(px-view.tx)/view.s,y=(py-view.ty)/view.s;
+  for(let i=0;i<VP.length;i++){const b=VB[i];if(x<b[0]||x>b[2]||y<b[1]||y>b[3])continue;if(!passes(V[i]))continue;for(const r of VP[i])if(inRing(r,x,y))return i}
+  return -1;
+}
+function hqAt(px,py){
+  for(let i=0;i<D.hq.length;i++){const h=D.hq[i],dx=sx(h[2]*K)-px,dy=sy(-h[1])-py;if(dx*dx+dy*dy<=64)return i}
+  return -1;
+}
+function bindMap(){
+  const c=$("#map"),tip=$("#tip"),pts=new Map();let moved=0,last=null,pinch=null;
+  const pos=e=>{const b=c.getBoundingClientRect();return [e.clientX-b.left,e.clientY-b.top]};
+  c.addEventListener("pointerdown",e=>{c.setPointerCapture(e.pointerId);pts.set(e.pointerId,pos(e));moved=0;last=pos(e);if(pts.size===2){const a=[...pts.values()];pinch=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1])}});
+  c.addEventListener("pointermove",e=>{
+    const p=pos(e);
+    if(pts.has(e.pointerId)){
+      if(pts.size===2){pts.set(e.pointerId,p);const a=[...pts.values()],d=Math.hypot(a[0][0]-a[1][0],a[0][1]-a[1][1]);if(pinch){zoomAt(d/pinch,(a[0][0]+a[1][0])/2,(a[0][1]+a[1][1])/2)}pinch=d;moved=99;return}
+      const dx=p[0]-last[0],dy=p[1]-last[1];moved+=Math.abs(dx)+Math.abs(dy);
+      if(moved>4){view.tx+=dx;view.ty+=dy;clampView();view.fitted=false;c.classList.add("drag");tip.hidden=true;draw()}
+      last=p;pts.set(e.pointerId,p);return;
+    }
+    hover(p);
+  });
+  const up=e=>{
+    const p=pos(e);const wasClick=moved<=4&&pts.size===1;pts.delete(e.pointerId);if(pts.size<2)pinch=null;c.classList.remove("drag");
+    if(wasClick&&e.type==="pointerup")click(p);
+  };
+  c.addEventListener("pointerup",up);c.addEventListener("pointercancel",up);
+  c.addEventListener("pointerleave",()=>{tip.hidden=true;if(ST.hov>=0){ST.hov=-1;draw()}});
+  c.addEventListener("wheel",e=>{e.preventDefault();const p=pos(e);zoomAt(Math.exp(-e.deltaY*0.0015),p[0],p[1])},{passive:false});
+  c.addEventListener("keydown",e=>{
+    const k=e.key,st=70;let h=true;
+    if(k==="ArrowLeft")view.tx+=st;else if(k==="ArrowRight")view.tx-=st;else if(k==="ArrowUp")view.ty+=st;else if(k==="ArrowDown")view.ty-=st;
+    else if(k==="+"||k==="=")zoomBy(1.4);else if(k==="-"||k==="_")zoomBy(1/1.4);else if(k==="0"){fit(true)}else h=false;
+    if(h){e.preventDefault();view.fitted=false;clampView();draw()}
+  });
+  function hover(p){
+    const hi=hqAt(p[0],p[1]);let t="",hv=-1;
+    if(hi>=0&&ST.dist){t=`${D.hq[hi][0]} district headquarters (approximate)`}
+    else{
+      const i=nearest(p[0],p[1]);
+      if(i>=0){const v=V[i];t=`${D.districts[v.d]} · score ${f2(v.s)} · ${ZDESC[v.z]}`;hv=i}
+      else{
+        const vi=ST.bases.size||view.s>1500?villageAt(p[0],p[1]):-1;
+        if(vi>=0){const v=V[vi];t=`${D.districts[v.d]} · score ${f2(v.s)} · ${ZDESC[v.z]}`;hv=vi}
+        else{const d=districtAt(p[0],p[1]);if(d>=0)t=`${D.districts[d]} district · ${Dst[d].n} villages`}
+      }
+    }
+    if(hv!==ST.hov){ST.hov=hv;draw()}
+    if(!t){tip.hidden=true;return}
+    tip.textContent=t;tip.hidden=false;
+    const w=tip.offsetWidth;tip.style.left=Math.min(Math.max(8,p[0]+14),W-w-8)+"px";tip.style.top=Math.max(8,p[1]-34)+"px";
+  }
+  function click(p){
+    const hi=hqAt(p[0],p[1]);
+    if(hi>=0&&ST.dist){selectDistrict(D.districts.indexOf(D.hq[hi][3]),true);return}
+    let i=nearest(p[0],p[1]);
+    if(i<0&&(ST.bases.size||view.s>1500))i=villageAt(p[0],p[1]);
+    if(i>=0){ST.vsel=i;renderVillage();setPanels(undefined,true,false);draw();return}
+    const d=districtAt(p[0],p[1]);
+    if(d>=0){selectDistrict(d,true)}
+  }
+}
+</script>
+
+</body></html>

@@ -1,0 +1,22 @@
+{
+ "name": "Nagaland Springshed Atlas",
+ "short_name": "Springshed Atlas",
+ "start_url": "./index.html",
+ "scope": "./",
+ "display": "standalone",
+ "background_color": "#0b3d4a",
+ "theme_color": "#0b3d4a",
+ "icons": [
+  {
+   "src": "icon-192.png",
+   "sizes": "192x192",
+   "type": "image/png"
+  },
+  {
+   "src": "icon-512.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "any maskable"
+  }
+ ]
+}
